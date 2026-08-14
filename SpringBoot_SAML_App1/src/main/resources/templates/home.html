@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>Spring Boot SAML + Keycloak Demo</title>
+
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			max-width: 850px;
+			margin: 50px auto;
+			line-height: 1.5;
+		}
+
+		a {
+			display: inline-block;
+			margin: 6px 12px 6px 0;
+		}
+
+		code {
+			background: #f3f3f3;
+			padding: 2px 5px;
+		}
+		h1 {
+			background-color: red;
+    		color: white;
+			
+		}
+	</style>
+</head>
+
+<body>
+
+	<h1>You have successfully entered: Spring Boot SAML Application 1</h1>
+
+	<p>
+		This application is a SAML 2.0 Service Provider.
+		Keycloak is the Identity Provider.
+	</p>
+
+	<p>
+		<a href="/saml2/authenticate/keycloak">
+			Login with Keycloak
+		</a>
+	</p>
+
+	<p>
+		<a href="/private">
+			Protected endpoint
+		</a>
+	</p>
+
+	<p>
+		<a href="/user">
+			SAML user attributes
+		</a>
+	</p>
+
+	<p>
+		<a href="/saml2/metadata/keycloak">
+			Service Provider metadata
+		</a>
+	</p>
+
+	<p>
+		Keycloak IdP metadata:
+		<code>
+        http://localhost:8081/realms/MySecurityRealm/protocol/saml/descriptor
+    	</code>
+	</p>
+
+</body>
+
+</html>
