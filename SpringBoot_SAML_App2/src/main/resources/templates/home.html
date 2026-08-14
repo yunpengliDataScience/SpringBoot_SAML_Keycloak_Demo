@@ -40,31 +40,36 @@
 	</p>
 
 	<p>
-		<a href="/saml2/authenticate/keycloak">
-			Login with Keycloak
-		</a>
-	</p>
-
-	<p>
 		<a href="/private">
-			Protected endpoint
+			Show authentication attributes
 		</a>
 	</p>
 
 	<p>
 		<a href="/user">
-			SAML user attributes
+			Show SAML user attributes
 		</a>
 	</p>
 
 	<p>
 		<a href="/saml2/metadata/keycloak">
-			Service Provider metadata
+			Service Provider (Spring Application) metadata: 
 		</a>
+		<code>
+        http://localhost:9092/saml2/metadata/keycloak
+    	</code>
 	</p>
 
 	<p>
-		Keycloak IdP metadata:
+		Endpoint URL that initializes authentication request by Service Provider:
+		<code>
+        http://localhost:9092/saml2/authenticate/keycloak
+    	</code>
+	</p>
+	<p>
+		<a href="http://localhost:8081/realms/MySecurityRealm/protocol/saml/descriptor">
+			Keycloak IdP metadata:
+		</a>
 		<code>
         http://localhost:8081/realms/MySecurityRealm/protocol/saml/descriptor
     	</code>
