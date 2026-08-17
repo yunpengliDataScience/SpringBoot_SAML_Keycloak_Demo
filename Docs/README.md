@@ -12,7 +12,7 @@ A complete local demo in which:
 - Maven 3.6+
 - Spring Boot 3.5.16
 - Spring Security SAML2 Service Provider
-- Standalone Keycloak 26.7.1 ZIP distribution
+- Standalone Keycloak 26.7.1 ZIP distribution: [Downloads - Keycloak](https://www.keycloak.org/downloads)
 
 > Keycloak's current standalone getting-started guide may require a newer JDK than the Spring application. If your existing Java is too old for Keycloak, install a supported JDK and point Keycloak at it with `JAVA_HOME`. The Spring application itself only requires Java 17+.
 
