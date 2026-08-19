@@ -23,16 +23,16 @@ Browser
    |
    | GET /private
    v
-Spring Boot SP :8080
+Spring Boot SP :9091
    |
    | SAML AuthnRequest
    v
-Keycloak IdP :8081
+Keycloak IdP :9991
    |
    | User signs in
    | Signed SAML Response
    v
-POST http://localhost:8080/login/saml2/sso/keycloak
+POST http://localhost:9091/login/saml2/sso/keycloak
    |
    v
 Spring Security validates the response
@@ -67,7 +67,7 @@ keycloak-26.7.1/
 └── ...
 ```
 
-# 2. Start standalone Keycloak on port 8081
+# 2. Start standalone Keycloak on port 9991
 
 This project includes convenience scripts. They intentionally start Keycloak in **development mode** and bootstrap the demo administrator as `admin / admin`.
 
@@ -100,7 +100,7 @@ The scripts execute the equivalent of:
 
 ```bat
 %KEYCLOAK_HOME%\bin\kc.bat start-dev ^
-  --http-port=8081 ^
+  --http-port=9991 ^
   --bootstrap-admin-username=admin ^
   --bootstrap-admin-password=admin
 ```
@@ -109,7 +109,7 @@ The scripts execute the equivalent of:
 
 ```bash
 $KEYCLOAK_HOME/bin/kc.sh start-dev \
-  --http-port=8081 \
+  --http-port=9991 \
   --bootstrap-admin-username=admin \
   --bootstrap-admin-password=admin
 ```
@@ -117,7 +117,7 @@ $KEYCLOAK_HOME/bin/kc.sh start-dev \
 Keycloak should now be available at:
 
 ```text
-http://localhost:8081
+http://localhost:9991
 ```
 
 Admin credentials for this demo:
@@ -138,7 +138,7 @@ This normally means the Keycloak data directory was already initialized. Open Ke
 Open:
 
 ```text
-http://localhost:8081
+http://localhost:9991
 ```
 
 Log into **Administration Console** with `admin / admin`.
@@ -147,20 +147,20 @@ Then:
 
 1. Open **Manage realms**.
 2. Click **Create realm**.
-3. Realm name: `saml-demo`
+3. Realm name: `MySecurityRealm`
 4. Click **Create**.
 
 The SAML IdP metadata URL is now:
 
 ```text
-http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 The Spring application reads this metadata to discover Keycloak's issuer, SSO endpoints, bindings, and signing certificate.
 
 # 4. Create a Keycloak test user
 
-Inside the `saml-demo` realm:
+Inside the `MySecurityRealm` realm:
 
 1. Go to **Users**.
 2. Click **Create new user**.
@@ -192,13 +192,13 @@ mvn spring-boot:run
 Spring Boot starts at:
 
 ```text
-http://localhost:8080
+http://localhost:9091
 ```
 
-Important: Keycloak must be running and the `saml-demo` realm must already exist before Spring starts, because Spring loads the IdP metadata from:
+Important: Keycloak must be running and the `MySecurityRealm` realm must already exist before Spring starts, because Spring loads the IdP metadata from:
 
 ```text
-http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 # 6. Verify Spring's Service Provider metadata
@@ -206,7 +206,7 @@ http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
 Open:
 
 ```text
-http://localhost:8080/saml2/service-provider-metadata/keycloak
+http://localhost:9091/saml2/service-provider-metadata/keycloak
 ```
 
 This XML describes the Spring application to Keycloak.
@@ -215,10 +215,10 @@ Important values are:
 
 ```text
 SP Entity ID:
-  spring-saml-demo
+  SpringBoot_SAML_App
 
 Assertion Consumer Service (ACS):
-  http://localhost:8080/login/saml2/sso/keycloak
+  http://localhost:9091/login/saml2/sso/keycloak
 ```
 
 # 7. Create the SAML client in Keycloak
@@ -226,7 +226,7 @@ Assertion Consumer Service (ACS):
 In the Keycloak Admin Console, make sure you are in realm:
 
 ```text
-saml-demo
+MySecurityRealm
 ```
 
 Then:
@@ -234,31 +234,31 @@ Then:
 1. Open **Clients**.
 2. Click **Create client**.
 3. Client type/protocol: **SAML**.
-4. Client ID: `spring-saml-demo`
+4. Client ID: `SpringBoot_SAML_App`
 5. Create/save the client.
 
 The Keycloak Client ID must match Spring's SP Entity ID:
 
 ```yaml
-entity-id: spring-saml-demo
+entity-id: SpringBoot_SAML_App
 ```
 
 Configure the SAML client approximately as follows:
 
 ```text
 Client ID:
-  spring-saml-demo
+  SpringBoot_SAML_App
 
 Root URL:
-    http://localhost:8080
+    http://localhost:9091
 Home URL:
-    http://localhost:8080
+    http://localhost:9091
 
 Valid Redirect URIs:
-  http://localhost:8080/login/saml2/sso/keycloak
+  http://localhost:9091/login/saml2/sso/keycloak
 
 Master SAML Processing URL:
-  http://localhost:8080/login/saml2/sso/keycloak
+  http://localhost:9091/login/saml2/sso/keycloak
 
 Client signature required:
   Off
@@ -283,7 +283,7 @@ The exact placement/names of some settings can vary slightly between Keycloak UI
 Once Spring is running, open/save:
 
 ```text
-http://localhost:8080/saml2/service-provider-metadata/keycloak
+http://localhost:9091/saml2/service-provider-metadata/keycloak
 ```
 
 You can import that SAML Entity Descriptor into Keycloak instead of manually typing the SP metadata values. This often prevents ACS/entity-ID mistakes.
@@ -293,13 +293,13 @@ You can import that SAML Entity Descriptor into Keycloak instead of manually typ
 Open:
 
 ```text
-http://localhost:8080
+http://localhost:9091
 ```
 
 Click **Login with Keycloak**, or open directly:
 
 ```text
-http://localhost:8080/saml2/authenticate/keycloak
+http://localhost:9091/saml2/authenticate/keycloak
 ```
 
 The browser flow should be:
@@ -318,7 +318,7 @@ Keycloak
     | signed SAML Response
     v
 Spring ACS
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
     |
     v
 Authenticated Spring Security session
@@ -327,27 +327,27 @@ Authenticated Spring Security session
 Then test:
 
 ```text
-http://localhost:8080/private
+http://localhost:9091/private
 ```
 
 and:
 
 ```text
-http://localhost:8080/user
+http://localhost:9091/user
 ```
 
 # Important endpoints
 
-| Purpose               | URL                                                               |
-| --------------------- | ----------------------------------------------------------------- |
-| Spring application    | `http://localhost:8080`                                           |
-| Protected page        | `http://localhost:8080/private`                                   |
-| SAML user information | `http://localhost:8080/user`                                      |
-| Start SAML login      | `http://localhost:8080/saml2/authenticate/keycloak`               |
-| Spring ACS            | `http://localhost:8080/login/saml2/sso/keycloak`                  |
-| Spring SP metadata    | `http://localhost:8080/saml2/service-provider-metadata/keycloak`  |
-| Keycloak              | `http://localhost:8081`                                           |
-| Keycloak IdP metadata | `http://localhost:8081/realms/saml-demo/protocol/saml/descriptor` |
+| Purpose               | URL                                                                     |
+| --------------------- | ----------------------------------------------------------------------- |
+| Spring application    | `http://localhost:9091`                                                 |
+| Protected page        | `http://localhost:9091/private`                                         |
+| SAML user information | `http://localhost:9091/user`                                            |
+| Start SAML login      | `http://localhost:9091/saml2/authenticate/keycloak`                     |
+| Spring ACS            | `http://localhost:9091/login/saml2/sso/keycloak`                        |
+| Spring SP metadata    | `http://localhost:9091/saml2/service-provider-metadata/keycloak`        |
+| Keycloak              | `http://localhost:9991`                                                 |
+| Keycloak IdP metadata | `http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor` |
 
 # Spring SAML configuration
 
@@ -359,7 +359,7 @@ src/main/resources/application.yml
 
 ```yaml
 server:
-  port: 8080
+  port: 9091
 
 spring:
   security:
@@ -367,9 +367,9 @@ spring:
       relyingparty:
         registration:
           keycloak:
-            entity-id: spring-saml-demo
+            entity-id: SpringBoot_SAML_App
             assertingparty:
-              metadata-uri: http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+              metadata-uri: http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 Terminology:
@@ -384,7 +384,7 @@ Asserting Party          Identity Provider     Keycloak
 # Project structure
 
 ```text
-spring-saml-keycloak/
+SpringBoot_SAML_App/
 ├── pom.xml
 ├── README.md
 ├── scripts/
@@ -435,35 +435,35 @@ principal.getAttributes()
 Confirm Keycloak is running at:
 
 ```text
-http://localhost:8081
+http://localhost:9991
 ```
 
 Then confirm this URL returns XML:
 
 ```text
-http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
-If it returns `404`, create the `saml-demo` realm first.
+If it returns `404`, create the `MySecurityRealm` realm first.
 
-## Keycloak starts on port 8080 instead of 8081
+## Keycloak starts on port 9991
 
 Use:
 
 ```text
---http-port=8081
+--http-port=9991
 ```
 
 or use the included startup script.
 
-Spring intentionally uses port `8080`, while Keycloak uses `8081`.
+Spring intentionally uses port `9091`, while Keycloak uses `9991`.
 
 ## Invalid destination / invalid recipient
 
 The ACS must match exactly:
 
 ```text
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 ```
 
 ## Invalid audience
@@ -471,7 +471,7 @@ http://localhost:8080/login/saml2/sso/keycloak
 The Keycloak SAML client ID and Spring entity ID must match:
 
 ```text
-spring-saml-demo
+SpringBoot_SAML_App
 ```
 
 ## Signature validation errors
@@ -479,14 +479,14 @@ spring-saml-demo
 Make sure Spring is reading metadata from the same Keycloak realm that is issuing the SAML response:
 
 ```text
-http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 For this basic demo, leave **Client signature required** off. Keycloak can still sign its SAML response/assertion so Spring can verify the IdP.
 
 ## Port already in use
 
-Spring uses `8080`; Keycloak uses `8081`.
+Spring uses `9091`; Keycloak uses `9991`.
 
 To change Keycloak's port, you must also update `application.yml` and any Keycloak client URLs accordingly.
 
@@ -519,7 +519,7 @@ openssl req -x509 -newkey rsa:2048 \
   -out sp-certificate.crt \
   -days 3650 \
   -nodes \
-  -subj "/CN=spring-saml-demo"
+  -subj "/CN=SpringBoot_SAML_App"
 ```
 
 Put both files under:
@@ -539,7 +539,7 @@ Then configure them in `application.yml`. Spring Boot supports signing credentia
 
 ```yaml
 server:
-  port: 8080
+  port: 9091
 
 spring:
   security:
@@ -548,7 +548,7 @@ spring:
         registration:
           keycloak:
 
-            entity-id: spring-saml-demo
+            entity-id: SpringBoot_SAML_App
 
             signing:
               credentials:
@@ -556,7 +556,7 @@ spring:
                   certificate-location: classpath:saml/sp-certificate.crt
 
             assertingparty:
-              metadata-uri: http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+              metadata-uri: http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 Now remove this override:
@@ -608,9 +608,9 @@ public class SecurityConfig {
 Then in Keycloak, go to:
 
 ```text
-Realm: saml-demo
+Realm: MySecurityRealm
 → Clients
-→ spring-saml-demo
+→ SpringBoot_SAML_App
 → Keys
 ```
 
@@ -665,7 +665,7 @@ Spring Security uses the configured signing credential specifically for signing 
 After restarting Spring Boot, open:
 
 ```text
-http://localhost:8080/saml2/metadata/keycloak
+http://localhost:9091/saml2/metadata/keycloak
 ```
 
 Your metadata should now contain a certificate section similar to:
@@ -689,7 +689,7 @@ That certificate is Spring telling Keycloak:
 Then test:
 
 ```text
-http://localhost:8080/saml2/authenticate/keycloak
+http://localhost:9091/saml2/authenticate/keycloak
 ```
 
 At that point your previous:

@@ -2,7 +2,7 @@
 
 ## Overall architecture
 
-```text
+``` text
                      SAML 2.0
 
      Spring Boot                       Keycloak
@@ -22,31 +22,31 @@
 
 Your servers are:
 
-```text
-Spring Boot:  http://localhost:8080
-Keycloak:     http://localhost:8081
+``` text
+Spring Boot:  http://localhost:9091
+Keycloak:     http://localhost:9991
 ```
 
 And your Spring registration ID is:
 
-```yaml
+``` yaml
 registration:
   keycloak:
 ```
 
 Therefore `{registrationId}` = `keycloak`.
 
----
+------------------------------------------------------------------------
 
 ## 1. Spring: Start SAML Login
 
-```text
-http://localhost:8080/saml2/authenticate/keycloak
+``` text
+http://localhost:9091/saml2/authenticate/keycloak
 ```
 
 General Spring Security pattern:
 
-```text
+``` text
 /saml2/authenticate/{registrationId}
 ```
 
@@ -56,7 +56,7 @@ This is where the **browser starts SAML authentication**.
 
 For example, your HTML contains:
 
-```html
+``` html
 <a href="/saml2/authenticate/keycloak">
     Login with Keycloak
 </a>
@@ -64,7 +64,7 @@ For example, your HTML contains:
 
 The flow is:
 
-```text
+``` text
 Browser
    │
    │ GET
@@ -80,41 +80,42 @@ Spring Security
 Redirect to Keycloak
 ```
 
-Spring Security handles this endpoint. You do **not** create a controller for it.
+Spring Security handles this endpoint. You do **not** create a
+controller for it.
 
----
+------------------------------------------------------------------------
 
 ## 2. Keycloak: SAML SSO Endpoint
 
 The browser is redirected to Keycloak's SAML endpoint:
 
-```text
-http://localhost:8081/realms/saml-demo/protocol/saml
+``` text
+http://localhost:9991/realms/MySecurityRealm/protocol/saml
 ```
 
 General Keycloak pattern:
 
-```text
+``` text
 /realms/{realm}/protocol/saml
 ```
 
 For your realm:
 
-```text
-realm = saml-demo
+``` text
+realm = MySecurityRealm
 ```
 
 therefore:
 
-```text
-http://localhost:8081/realms/saml-demo/protocol/saml
+``` text
+http://localhost:9991/realms/MySecurityRealm/protocol/saml
 ```
 
 ### Purpose
 
 Keycloak receives Spring's:
 
-```xml
+``` xml
 <AuthnRequest>
 ```
 
@@ -122,14 +123,14 @@ and authenticates the user.
 
 For example:
 
-```text
+``` text
 john
 password
 ```
 
 The interaction is:
 
-```text
+``` text
 Spring
    │
    │ AuthnRequest
@@ -144,33 +145,34 @@ Keycloak Login Page
 Authentication successful
 ```
 
-Normally you don't hard-code this URL into your Spring application because Spring discovers it from **Keycloak's IdP metadata**.
+Normally you don't hard-code this URL into your Spring application
+because Spring discovers it from **Keycloak's IdP metadata**.
 
----
+------------------------------------------------------------------------
 
 ## 3. Spring: ACS URL
 
 After successful authentication, Keycloak sends the SAML response to:
 
-```text
-http://localhost:8080/login/saml2/sso/keycloak
+``` text
+http://localhost:9091/login/saml2/sso/keycloak
 ```
 
 General Spring Security pattern:
 
-```text
+``` text
 /login/saml2/sso/{registrationId}
 ```
 
 This is called the:
 
-**ACS — Assertion Consumer Service URL**
+**ACS --- Assertion Consumer Service URL**
 
 ### Purpose
 
 It receives:
 
-```xml
+``` xml
 <SAMLResponse>
     <Assertion>
        ...
@@ -180,12 +182,12 @@ It receives:
 
 from Keycloak.
 
-```text
+``` text
 Keycloak
     │
     │ POST SAMLResponse
     ▼
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
     │
     ▼
 Spring Security
@@ -203,37 +205,37 @@ Authenticated
 
 This is the URL you configure in Keycloak as:
 
-```text
+``` text
 Valid Redirect URIs:
 
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 ```
 
 and:
 
-```text
+``` text
 Master SAML Processing URL:
 
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 ```
 
----
+------------------------------------------------------------------------
 
 ## 4. Spring: Service Provider Metadata
 
-```text
-http://localhost:8080/saml2/metadata/keycloak
+``` text
+http://localhost:9091/saml2/metadata/keycloak
 ```
 
 General pattern:
 
-```text
+``` text
 /saml2/metadata/{registrationId}
 ```
 
 You enable this in Spring Security with:
 
-```java
+``` java
 .saml2Metadata(withDefaults())
 ```
 
@@ -245,8 +247,8 @@ This URL tells other SAML systems:
 
 The XML contains information such as:
 
-```xml
-<EntityDescriptor entityID="spring-saml-demo">
+``` xml
+<EntityDescriptor entityID="SpringBoot_SAML_App">
 
     <SPSSODescriptor>
 
@@ -256,7 +258,7 @@ The XML contains information such as:
 
         <AssertionConsumerService
             Location=
-            "http://localhost:8080/login/saml2/sso/keycloak"/>
+            "http://localhost:9091/login/saml2/sso/keycloak"/>
 
     </SPSSODescriptor>
 
@@ -265,14 +267,14 @@ The XML contains information such as:
 
 Keycloak can learn from it:
 
-```text
+``` text
 Spring Entity ID
         ↓
-spring-saml-demo
+SpringBoot_SAML_App
 
 Spring ACS
         ↓
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 
 Spring certificate
         ↓
@@ -281,23 +283,23 @@ Spring certificate
 
 So this URL describes **Spring to Keycloak**.
 
----
+------------------------------------------------------------------------
 
 ## 5. Keycloak: Identity Provider Metadata
 
-```text
-http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+``` text
+http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 General Keycloak pattern:
 
-```text
+``` text
 /realms/{realm}/protocol/saml/descriptor
 ```
 
 This is the URL you've configured in Spring:
 
-```yaml
+``` yaml
 spring:
   security:
     saml2:
@@ -305,11 +307,11 @@ spring:
         registration:
           keycloak:
 
-            entity-id: spring-saml-demo
+            entity-id: SpringBoot_SAML_App
 
             assertingparty:
               metadata-uri:
-                http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+                http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
 ### Purpose
@@ -322,7 +324,7 @@ It tells Spring:
 
 For example, it contains:
 
-```text
+``` text
 Keycloak Entity ID
 Keycloak SSO endpoint
 Keycloak signing certificate
@@ -331,7 +333,7 @@ supported SAML bindings
 
 Conceptually:
 
-```text
+``` text
 Keycloak IdP Metadata
         │
         ▼
@@ -345,23 +347,31 @@ Spring learns
 to verify Keycloak's signatures?"
 ```
 
----
+------------------------------------------------------------------------
 
 # The five important URLs
 
 For your demo, this is the table I'd keep as a reference:
 
-| URL                                                               | Owned by | Purpose                            |
-| ----------------------------------------------------------------- | -------- | ---------------------------------- |
-| `http://localhost:8080/saml2/authenticate/keycloak`               | Spring   | Start SAML login                   |
-| `http://localhost:8081/realms/saml-demo/protocol/saml`            | Keycloak | Receive AuthnRequest / perform SSO |
-| `http://localhost:8080/login/saml2/sso/keycloak`                  | Spring   | ACS: receive SAMLResponse          |
-| `http://localhost:8080/saml2/metadata/keycloak`                   | Spring   | Spring SP metadata                 |
-| `http://localhost:8081/realms/saml-demo/protocol/saml/descriptor` | Keycloak | Keycloak IdP metadata              |
+  -----------------------------------------------------------------------------------------------------------
+  URL                                                                       Owned by   Purpose
+  ------------------------------------------------------------------------- ---------- ----------------------
+  `http://localhost:9091/saml2/authenticate/keycloak`                       Spring     Start SAML login
+
+  `http://localhost:9991/realms/MySecurityRealm/protocol/saml`              Keycloak   Receive AuthnRequest /
+                                                                                       perform SSO
+
+  `http://localhost:9091/login/saml2/sso/keycloak`                          Spring     ACS: receive
+                                                                                       SAMLResponse
+
+  `http://localhost:9091/saml2/metadata/keycloak`                           Spring     Spring SP metadata
+
+  `http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor`   Keycloak   Keycloak IdP metadata
+  -----------------------------------------------------------------------------------------------------------
 
 The easiest way to remember them is:
 
-```text
+``` text
 START LOGIN
 Spring
 /saml2/authenticate/keycloak
@@ -372,7 +382,7 @@ Spring
 
 KEYCLOAK LOGIN
 Keycloak
-/realms/saml-demo/protocol/saml
+/realms/MySecurityRealm/protocol/saml
 
               │
               │ SAMLResponse
@@ -385,12 +395,12 @@ Spring
 
 And separately:
 
-```text
+``` text
               METADATA
 
 Spring SP                         Keycloak IdP
 
-/saml2/metadata/keycloak         /realms/saml-demo/
+/saml2/metadata/keycloak         /realms/MySecurityRealm/
                                  protocol/saml/descriptor
 
         │                               │
@@ -405,38 +415,40 @@ This distinction is useful.
 
 **In Spring `application.yml`:**
 
-```yaml
+``` yaml
 assertingparty:
   metadata-uri:
-    http://localhost:8081/realms/saml-demo/protocol/saml/descriptor
+    http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor
 ```
 
-Spring reads that metadata and discovers Keycloak's SAML SSO configuration.
+Spring reads that metadata and discovers Keycloak's SAML SSO
+configuration.
 
 **In Keycloak's SAML client:**
 
-```text
+``` text
 Client ID:
-spring-saml-demo
+SpringBoot_SAML_App
 
 Valid Redirect URIs:
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 
 Master SAML Processing URL:
-http://localhost:8080/login/saml2/sso/keycloak
+http://localhost:9091/login/saml2/sso/keycloak
 ```
 
-Or, instead of manually entering the SP information, you can use Spring's metadata:
+Or, instead of manually entering the SP information, you can use
+Spring's metadata:
 
-```text
-http://localhost:8080/saml2/metadata/keycloak
+``` text
+http://localhost:9091/saml2/metadata/keycloak
 ```
 
 to describe the Spring SP.
 
 So conceptually, the two metadata URLs make configuration easier:
 
-```text
+``` text
 Spring needs to know about Keycloak
               │
               ▼
@@ -451,7 +463,7 @@ Spring SP Metadata
 
 And the two most important **runtime** URLs are:
 
-```text
+``` text
 Spring → Keycloak:
 
 /saml2/authenticate/keycloak
@@ -466,4 +478,6 @@ Keycloak → Spring:
 receives SAMLResponse
 ```
 
-Those four concepts—**Login Initiation, IdP SSO Endpoint, ACS, and SP/IdP Metadata**—cover most of the URLs you'll encounter when debugging this Spring Security + Keycloak SAML setup.
+Those four concepts---**Login Initiation, IdP SSO Endpoint, ACS, and
+SP/IdP Metadata**---cover most of the URLs you'll encounter when
+debugging this Spring Security + Keycloak SAML setup.
