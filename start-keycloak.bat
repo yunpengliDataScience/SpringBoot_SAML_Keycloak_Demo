@@ -25,10 +25,10 @@ if not exist "%KEYCLOAK_HOME%\bin\kc.bat" (
   exit /b 1
 )
 
-echo Starting Keycloak at http://localhost:8081 ...
+echo Starting Keycloak at http://localhost:9991 ...
 echo Demo bootstrap admin: admin / admin
 
 call "%KEYCLOAK_HOME%\bin\kc.bat" start-dev ^
-  --http-port=8081 ^
+  --http-port=9991 ^
   --bootstrap-admin-username=admin ^
   --bootstrap-admin-password=admin

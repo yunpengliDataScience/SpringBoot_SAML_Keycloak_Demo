@@ -17,7 +17,7 @@ public class SecurityConfig {
 	@Bean
 	public RelyingPartyRegistrationRepository relyingPartyRegistrationRepository() {
 
-		//String idpMetaDataLocation = "http://localhost:8081/realms/MySecurityRealm/protocol/saml/descriptor";
+		//String idpMetaDataLocation = "http://localhost:9991/realms/MySecurityRealm/protocol/saml/descriptor";
 		String idpMetaDataLocation = "classpath:saml/keycloak-metadata.xml";
 		
 		RelyingPartyRegistration registration = RelyingPartyRegistrations
